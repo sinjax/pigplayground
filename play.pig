@@ -1,0 +1,10 @@
+data = load 'tojoin' using PigStorage() as (l, p, r);
+f1 = filter data by p == 'desc';
+f2 = filter data by p == 'wiki';
+t1 = foreach f1 generate l, r as des; 
+g = group t1 by l;
+j = join g by group, f2 by l;
+-- bgp = foreach j generate f2::l as name, flatten(BagToTuple(g::f1.r)) as descs, f2::r as wiki;
+bgp = foreach j generate f2::l as name, g::t1.des as descs, f2::r as wiki;
+store bgp into 'out.json' using JsonStorage();
+-- store bgp into 'out.csv' using CSVExcelStorage();
